@@ -12,5 +12,7 @@ namespace Dominio.Interfaces
         Task<IEnumerable<object>> PedidoNoAtiempo(); // 2
         Task<IEnumerable<object>> ProductosSinPedidos(); // 3
         Task<IEnumerable<object>> OficinasNoTrabajanEmpleados(); // 4
+        Task<IEnumerable<object>> ClienteNoATiempo(); // 9
+        Task<IEnumerable<object>> GamaCliente(); // 10
     }
 }

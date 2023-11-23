@@ -1,4 +1,4 @@
-# Jardineria
+# Jardineria Filtro Final
 
 Este proyecto proporciona una API que permite gestionar el apartado de la administración de una Jardinearia
 
@@ -8,7 +8,6 @@ Una vez que el proyecto esté en marcha, puedes acceder a los diferentes endpoin
 
 ## Características 🌟
 
-- Registro de usuarios.
 - CRUD completo para cada entidad.
 - Vista de las consultas requeridas.
 
@@ -235,6 +234,105 @@ Codigo Consulta:
 Explicacion:
 
     empezamos llamando la tabla detalles pedidos donde hacer un GroupBy para seguido hacer un select donde elegimos el codigo del producto y el tota de unidades vendidas por medio del metodo sum para despues hacer un order by descending con el total de unidades para elegir despues con el FirstOrDefaultAsync la consulta primera la cual en teoria es la que tiene la mas grande total de unidades vendides para despues con un where agarrar el id del producto y mostrar el nombre con el numero 
+## 8. Devuelve un listado de los 20 productos más vendidos y el número total de unidades que se han vendido de cada uno. El listado deberá estar ordenado por el número total de unidades vendidas.
+
+Enpoint: 
+
+    http://localhost:5297/api/producto/consulta8
+
+Codigo Consulta:
+
+    public async Task<IEnumerable<object>> ProductosMasVendidos() // 8
+        {
+            var query = await (
+                from dp in _context.DetallePedidos
+                group dp by new { dp.IdProductoFk } into grp
+                orderby grp.Sum(dp => dp.Cantidad) descending
+                select new
+                {
+                    IdProducto = grp.Key.IdProductoFk,
+                    TotalUnidadesVendidas = grp.Sum(dp => dp.Cantidad)
+                }
+            ).Take(20).ToListAsync();
+
+
+            return query;
+        }
+
+Explicacion:
+
+    en esta consulta llamamos a detalles pedidos para despues hacer un Group llamado grp donde le hago un orderby descendiente para para asi poder agarrar con el take(20) para con el select mostar la informacion pertinente
+
+## 9. Devuelve el nombre de los clientes a los que no se les ha entregado a tiempo un pedido.
+
+Enpoint:
+
+    http://localhost:5297/api/cliente/consulta9
+
+Codigo Consulta:
+
+    public async Task<IEnumerable<object>> ClienteNoATiempo() // 9
+        {
+            return await (
+                from p in _context.Pedidos
+                join c in _context.Clientes on p.IdClienteFk equals c.Id
+                
+                where p.FechaEsperada != p.FechaEntregada
+                select new
+                {
+                    NombreCliente = c.NombreCliente,
+                    FechaEsperada = p.FechaEsperada,
+                    FechaEntregada = p.FechaEntregada
+                }
+            ).Distinct()
+            .ToListAsync();
+        }
+
+Explicacion:
+
+    llamamos a pedidos y a clientes para despues hacer un where para que me traiga solo los pedidos con los clientes que la fecha esperada no fue la misma de la entregada para luego mostrar los nombres de los clientes 
+
+## 10.  Devuelve un listado de las diferentes gamas de producto que ha comprado cada cliente.
+
+Enpoint:
+
+    http://localhost:5297/api/cliente/consulta10
+
+Codigo Consulta:
+
+    public async Task<IEnumerable<object>> GamaCliente() // 10
+            {
+                var query = await (
+                    from d in _context.DetallePedidos
+                    join p in _context.Pedidos on d.IdPedidoFk equals p.Id
+                    join c in _context.Clientes on p.IdClienteFk equals c.Id
+                    where p.FechaEntregada != p.FechaEsperada
+                    select new
+                    {
+                        CodigoCliente = c.Id,
+                        NombreCliente = c.NombreCliente,
+                        IdGamaProducto = (
+                            from p in _context.Productos
+                            where p.Id == d.IdProductoFk
+                            select p.IdGamaProductoFk
+                        ).ToList()
+                    }
+                ).ToListAsync();
+                var info = query
+                    .GroupBy(r => new { r.CodigoCliente, r.NombreCliente })
+                    .Select(g => new
+                    {
+                        CodigoCliente = g.Key.CodigoCliente,
+                        NombreCliente = g.Key.NombreCliente,
+                        Gamas = g.SelectMany(r => r.IdGamaProducto).Distinct()
+                    });
+                return info;
+            }
+
+Explicacion:
+
+    en esta consulta tambien tenemos 2 bloques, en el bloque de query tenemos las entidades detalle pedidos, pedidos, clientes donde le hacer un where donde la fecha esperada no fue la misma de la entregada para luego en un selec seleccionar la informacion como el codigo del cliente, nombre del cliente y el id gamaproducto
+    para luego en el bloque de info con un groupby hacer un grupo donde haremos un select para mostrar la informacion para mostrar el codigo del cliente, nombrel del cliente y las gamas que por medio de la sub consulta del primer select las podemos traer 
 
 ## Desarrollo ⌨️
 Este proyecto utiliza varias tecnologías y patrones, incluidos:
@@ -254,4 +352,5 @@ A todas las librerías y herramientas utilizadas en este proyecto.
 A ti, por considerar el uso de este sistema.
 
 por Owen 🦝
+
 ![image](84bcac4692cb6869d70423fd7d25e901.jpg)

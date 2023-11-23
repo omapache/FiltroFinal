@@ -105,4 +105,13 @@ public class ProductoController : BaseApiController
         var Cliente = await unitofwork.Productos.ProductoMasVendido();
         return mapper.Map<List<object>>(Cliente);
     }
+    [HttpGet("consulta8")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+
+    public async Task<ActionResult<IEnumerable<object>>> ProductosMasVendidos()
+    {
+        var Cliente = await unitofwork.Productos.ProductosMasVendidos();
+        return mapper.Map<List<object>>(Cliente);
+    }
 }

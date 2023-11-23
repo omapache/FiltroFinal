@@ -89,5 +89,50 @@ public class ClienteRepository : GenericRepo<Cliente>, ICliente
         ).Distinct()
         .ToListAsync();
     }
+
+    public async Task<IEnumerable<object>> ClienteNoATiempo() // 9
+    {
+        return await (
+               from p in _context.Pedidos
+               join c in _context.Clientes on p.IdClienteFk equals c.Id
+               
+               where p.FechaEsperada != p.FechaEntregada
+               select new
+               {
+                   NombreCliente = c.NombreCliente,
+                   FechaEsperada = p.FechaEsperada,
+                   FechaEntregada = p.FechaEntregada
+               }
+           ).Distinct()
+           .ToListAsync();
+    }
+    public async Task<IEnumerable<object>> GamaCliente() // 10
+        {
+            var query = await (
+                from d in _context.DetallePedidos
+                join p in _context.Pedidos on d.IdPedidoFk equals p.Id
+                join c in _context.Clientes on p.IdClienteFk equals c.Id
+                where p.FechaEntregada != p.FechaEsperada
+                select new
+                {
+                    CodigoCliente = c.Id,
+                    NombreCliente = c.NombreCliente,
+                    IdGamaProducto = (
+                        from p in _context.Productos
+                        where p.Id == d.IdProductoFk
+                        select p.IdGamaProductoFk
+                    ).ToList()
+                }
+            ).ToListAsync();
+            var info = query
+                .GroupBy(r => new { r.CodigoCliente, r.NombreCliente })
+                .Select(g => new
+                {
+                    CodigoCliente = g.Key.CodigoCliente,
+                    NombreCliente = g.Key.NombreCliente,
+                    Gamas = g.SelectMany(r => r.IdGamaProducto).Distinct()
+                });
+            return info;
+        }
     
 }

@@ -123,4 +123,22 @@ public class ClienteController : BaseApiController
         var Cliente = await unitofwork.Clientes.OficinasNoTrabajanEmpleados();
         return mapper.Map<List<object>>(Cliente);
     }
+    [HttpGet("consulta9")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+
+    public async Task<ActionResult<IEnumerable<object>>> ClienteNoATiempo()
+    {
+        var Cliente = await unitofwork.Clientes.ClienteNoATiempo();
+        return mapper.Map<List<object>>(Cliente);
+    }
+    [HttpGet("consulta10")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+
+    public async Task<ActionResult<IEnumerable<object>>> GamaCliente()
+    {
+        var Cliente = await unitofwork.Clientes.GamaCliente();
+        return mapper.Map<List<object>>(Cliente);
+    }
 }

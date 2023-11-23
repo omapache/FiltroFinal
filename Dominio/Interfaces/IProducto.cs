@@ -10,5 +10,6 @@ namespace Dominio.Interfaces
     {
         Task<IEnumerable<object>> VentasProductosMas3000Euros(); // 5
         Task<IEnumerable<object>> ProductoMasVendido(); // 7
+        Task<IEnumerable<object>> ProductosMasVendidos(); // 8
     }
 }

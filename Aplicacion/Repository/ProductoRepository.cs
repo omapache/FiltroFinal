@@ -71,5 +71,20 @@ public class ProductoRepository : GenericRepoB<Producto>, IProducto
         return info;
 
     }
+    public async Task<IEnumerable<object>> ProductosMasVendidos() // 8
+    {
+        var query = await (
+            from dp in _context.DetallePedidos
+            group dp by new { dp.IdProductoFk } into grp
+            orderby grp.Sum(dp => dp.Cantidad) descending
+            select new
+            {
+                IdProducto = grp.Key.IdProductoFk,
+                TotalUnidadesVendidas = grp.Sum(dp => dp.Cantidad)
+            }
+        ).Take(20).ToListAsync();
 
+
+        return query;
+    }
 }
